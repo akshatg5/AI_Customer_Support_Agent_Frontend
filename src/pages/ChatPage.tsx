@@ -1,4 +1,7 @@
+"use client"
+
 import type React from "react"
+
 import { useEffect, useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -6,6 +9,8 @@ import { apiClient } from "@/lib/apiClient"
 import { useNavigate } from "react-router-dom"
 import { Send, Loader2, MessageSquare, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface ChatMessage {
   id?: string
@@ -259,7 +264,13 @@ export function ChatPage() {
                         {msg.status === "sending" && <Loader2 className="w-3 h-3 animate-spin opacity-70" />}
                         {showError && <span className="text-[10px] text-destructive">Failed to send</span>}
                       </div>
-                      <div className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                      {isUser ? (
+                        <div className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                      ) : (
+                        <div className="prose prose-sm dark:prose-invert max-w-none prose-p:leading-relaxed prose-pre:bg-background/50 prose-pre:border prose-pre:border-border prose-code:text-foreground prose-headings:text-foreground prose-strong:text-foreground prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
+                        </div>
+                      )}
                       {msg.timestamp && (
                         <div className={cn("text-[10px] mt-1.5 opacity-60", isUser ? "text-right" : "text-left")}>
                           {formatTimestamp(msg.timestamp)}
