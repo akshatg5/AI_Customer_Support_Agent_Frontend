@@ -1,7 +1,12 @@
+import type React from "react";
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { apiClient } from "../lib/apiClient";
+import { Mail, Lock, User, AlertCircle, CheckCircle2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { apiClient } from "@/lib/apiClient";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 type Mode = "login" | "signup";
 
@@ -34,23 +39,24 @@ export function AuthForm({ mode, onModeChange, onAuthSuccess }: AuthFormProps) {
           email,
           password,
         });
-        setSuccess("Signup successful. You can now log in.");
-        console.log("Signup response:", response.data);
+        setSuccess("Account created successfully! Redirecting to login...");
+        setTimeout(() => {
+          if (onAuthSuccess) onAuthSuccess();
+        }, 1500);
       } else {
         const response = await apiClient.post("/api/auth/login", {
           email,
           password,
         });
-        setSuccess("Login successful!");
-        console.log("Login response:", response.data);
-        // Example: store token in localStorage for later use
+        setSuccess("Login successful! Redirecting...");
         if (response.data?.token) {
           localStorage.setItem("authToken", response.data.token);
-          if (onAuthSuccess) onAuthSuccess();
+          setTimeout(() => {
+            if (onAuthSuccess) onAuthSuccess();
+          }, 800);
         }
       }
     } catch (err: any) {
-      console.error("Auth error:", err);
       const message =
         err?.response?.data?.error ||
         err?.response?.data?.message ||
@@ -62,89 +68,115 @@ export function AuthForm({ mode, onModeChange, onAuthSuccess }: AuthFormProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4">
-      <Card className="w-full max-w-md p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-semibold">
-            {isSignup ? "Create an account" : "Welcome back"}
+    <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 flex flex-col items-center justify-center px-4 py-12">
+      <Card className="w-full max-w-md p-8 space-y-6 shadow-lg">
+        <div className="space-y-2 text-center">
+          <h1 className="text-3xl font-bold tracking-tight">
+            {isSignup ? "Create Account" : "Welcome Back"}
           </h1>
-          <Button
-            variant="outline"
-            size="sm"
-            type="button"
-            onClick={() => onModeChange(isSignup ? "login" : "signup")}
-          >
-            {isSignup ? "Have an account? Log in" : "New here? Sign up"}
-          </Button>
+          <p className="text-sm text-muted-foreground">
+            {isSignup
+              ? "Sign up to start chatting with your AI assistant"
+              : "Log in to continue your conversation"}
+          </p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {isSignup && (
-            <div className="space-y-1">
-              <label className="block text-sm font-medium">Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                className="w-full px-3 py-2 rounded-md border bg-background"
-                placeholder="Jane Doe"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="pl-10"
+                  placeholder="Jane Doe"
+                />
+              </div>
             </div>
           )}
 
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-md border bg-background"
-              placeholder="you@example.com"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="pl-10"
+                placeholder="you@example.com"
+              />
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="block text-sm font-medium">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 rounded-md border bg-background"
-              placeholder="••••••••"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="pl-10"
+                placeholder="••••••••"
+                minLength={6}
+              />
+            </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading} size="lg">
             {loading
               ? isSignup
-                ? "Signing up..."
+                ? "Creating account..."
                 : "Logging in..."
               : isSignup
-              ? "Sign up"
-              : "Log in"}
+              ? "Sign Up"
+              : "Log In"}
           </Button>
         </form>
 
         {error && (
-          <p className="text-sm text-red-500" role="alert">
-            {error}
-          </p>
+          <div
+            className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 text-destructive text-sm"
+            role="alert"
+          >
+            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
+
         {success && (
-          <p className="text-sm text-emerald-600" role="status">
-            {success}
-          </p>
+          <div
+            className="flex items-start gap-2 p-3 rounded-lg bg-emerald-500/10 text-emerald-600 text-sm"
+            role="status"
+          >
+            <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{success}</span>
+          </div>
         )}
+
+        <div className="text-center text-sm">
+          <button
+            type="button"
+            onClick={() => onModeChange(isSignup ? "login" : "signup")}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isSignup ? "Already have an account? " : "Don't have an account? "}
+            <span className="font-semibold underline">
+              {isSignup ? "Log in" : "Sign up"}
+            </span>
+          </button>
+        </div>
       </Card>
     </div>
   );
 }
-
-
