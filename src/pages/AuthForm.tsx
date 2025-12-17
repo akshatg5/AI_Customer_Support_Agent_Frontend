@@ -34,7 +34,7 @@ export function AuthForm({ mode, onModeChange, onAuthSuccess }: AuthFormProps) {
 
     try {
       if (isSignup) {
-        const response = await apiClient.post("/api/auth/signup", {
+        await apiClient.post("/api/auth/signup", {
           name,
           email,
           password,
