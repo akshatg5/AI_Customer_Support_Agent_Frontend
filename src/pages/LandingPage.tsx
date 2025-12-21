@@ -3,7 +3,6 @@
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../components/Footer";
 import { MessageSquare, Shield, Clock, Sparkles } from "lucide-react";
 
 export function LandingPage() {
@@ -90,8 +89,6 @@ export function LandingPage() {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }

@@ -14,4 +14,20 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+export const whoami = async () => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    return { authenticated: false };
+  }
 
+  try {
+    const response = await apiClient.get("/api/auth/whoami", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    return { authenticated: false };
+  }
+};
